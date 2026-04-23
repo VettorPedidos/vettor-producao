@@ -27,6 +27,7 @@ input, select {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
+    box-sizing: border-box;
 }
 
 button {
@@ -52,12 +53,12 @@ button {
     <h2>PAINEL ADMIN</h2>
 
     <input type="text" id="nome" placeholder="Nome completo">
-    <input type="text" id="vendedor" placeholder="Nome vendedor (ex: GABY)">
-    <input type="text" id="codigo" placeholder="Código vendedor (ex: V001)">
-    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="usuario" placeholder="Usuário login (ex: GABY)">
+    <input type="text" id="codigo" placeholder="Código vendedor (ex: GC)">
+    <input type="email" id="email" placeholder="Email recuperação">
     <input type="password" id="senha" placeholder="Senha provisória">
 
-    <input type="text" id="pedidoInicial" placeholder="Número inicial pedido (ex: 0001)">
+    <input type="text" id="sequencia" placeholder="Número inicial pedido (ex: 0084)">
 
     <select id="tipo">
         <option value="vendedor">VENDEDOR</option>
@@ -81,7 +82,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
     getAuth,
     createUserWithEmailAndPassword,
-    signOut
+    signOut,
+    signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -105,39 +107,56 @@ const db = getFirestore(app);
 
 window.cadastrarUsuario = async function () {
 
-    const nome = document.getElementById("nome").value;
-    const vendedor = document.getElementById("vendedor").value;
-    const codigo = document.getElementById("codigo").value;
-    const email = document.getElementById("email").value;
+    const nome = document.getElementById("nome").value.trim().toUpperCase();
+    const usuario = document.getElementById("usuario").value.trim().toUpperCase();
+    const codigo = document.getElementById("codigo").value.trim().toUpperCase();
+    const email = document.getElementById("email").value.trim().toLowerCase();
     const senha = document.getElementById("senha").value;
-    const pedidoInicial = document.getElementById("pedidoInicial").value;
+    const sequencia = document.getElementById("sequencia").value.trim();
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
 
-    if (!nome || !vendedor || !codigo || !email || !senha || !pedidoInicial) {
+    if (!nome || !usuario || !codigo || !email || !senha || !sequencia) {
         alert("Preencha todos os campos");
         return;
     }
 
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+
+        // CRIA LOGIN NO FIREBASE AUTH
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            senha
+        );
+
         const uid = userCredential.user.uid;
 
+        // SALVA DADOS COMPLETOS NO FIRESTORE
         await setDoc(doc(db, "usuarios", uid), {
-            nome,
-            vendedor,
-            codigo,
-            email,
-            pedidoAtual: pedidoInicial,
-            tipo,
-            status,
+            nome: nome,
+            usuario: usuario,
+            codigo: codigo,
+            email: email,
+            sequencia: sequencia,
+            tipo: tipo,
+            status: status,
             senhaProvisoria: true,
             criadoEm: new Date()
         });
 
+        // RELOGA O ADMIN
+        await signInWithEmailAndPassword(
+            auth,
+            "admin@vettor.com",
+            prompt("Digite novamente a senha do ADMIN para continuar:")
+        );
+
         alert("Usuário cadastrado com sucesso");
 
-        document.querySelectorAll("input").forEach(input => input.value = "");
+        document.querySelectorAll("input").forEach(input => {
+            input.value = "";
+        });
 
     } catch (error) {
         console.log(error);
