@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Login - VETTOR</title>
+
+<style>
+body {
+    background: #111;
+    font-family: Arial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    background: #fff;
+    padding: 30px;
+    width: 300px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #00A859;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.link {
+    margin-top: 10px;
+    display: block;
+    cursor: pointer;
+    color: blue;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>LOGIN</h2>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="senha" placeholder="Senha">
+
+    <button onclick="login()">ENTRAR</button>
+
+    <span class="link" onclick="esqueciSenha()">Esqueci minha senha</span>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC0YaL9Fb9Z7gmUvvCP9KekLyBpTmaAHhQ",
+  authDomain: "vettor-app.firebaseapp.com",
+  projectId: "vettor-app",
+  storageBucket: "vettor-app.firebasestorage.app",
+  messagingSenderId: "833679689475",
+  appId: "1:833679689475:web:b7ceb62ce14ab9b9b28b36"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.login = function () {
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+
+    signInWithEmailAndPassword(auth, email, senha)
+    .then(() => {
+        alert("Login OK");
+
+        if(email === "admin@vettor.com"){
+            window.location.href = "admin.html";
+        } else {
+            window.location.href = "index.html";
+        }
+    })
+    .catch(() => {
+        alert("Erro no login");
+    });
+}
+
+window.esqueciSenha = function () {
+    const email = document.getElementById('email').value;
+
+    if(!email){
+        alert("Digite seu email");
+        return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+    .then(() => {
+        alert("Email de recuperação enviado");
+    })
+    .catch(() => {
+        alert("Erro ao enviar email");
+    });
+}
+
+</script>
+
+</body>
+</html>
