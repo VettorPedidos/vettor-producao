@@ -964,6 +964,15 @@ async function atualizarSequenciaPedido() {
 // carregar ao abrir
 document.addEventListener("DOMContentLoaded", () => {
     carregarDadosUsuario();
+
+    // recalcula automaticamente a data de entrega
+    calcularDatas();
+
+    // garante funcionamento das observações
+    limitarObsGerais();
+
+    // força maiúsculo
+    forcarMaiusculoSempre();
 });
 
 
@@ -971,7 +980,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const salvarPDFAntigo = salvarPDF;
 
-salvarPDF = async function () {
+window.salvarPDF = async function () {
     await salvarNoBanco();
 
     await atualizarSequenciaPedido();
@@ -980,8 +989,19 @@ salvarPDF = async function () {
 
     setTimeout(() => {
         carregarDadosUsuario();
+        calcularDatas();
     }, 1500);
 };
+	
+window.gerenciarCliquePunho = gerenciarCliquePunho;
+window.removePunho = removePunho;
+window.verificarDelete = verificarDelete;
+window.calcularDatas = calcularDatas;
+window.atualizarExibicao = atualizarExibicao;
+window.subirPunho = subirPunho;
+window.addFoto = addFoto;
+window.salvarPDF = salvarPDF;
+	
 </script>
 </body>
 </html>
