@@ -137,6 +137,7 @@ window.login = async function () {
         await signInWithEmailAndPassword(auth, email, senha);
 
         // SALVA DADOS PARA USAR NO FORMULÁRIO
+        localStorage.setItem("uid", querySnapshot.docs[0].id);
         localStorage.setItem("usuarioNome", dadosUsuario.nome || "");
         localStorage.setItem("usuarioCodigo", dadosUsuario.codigo || "");
         localStorage.setItem("sequenciaAtual", dadosUsuario.sequencia || "0001");
