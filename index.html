@@ -17,7 +17,7 @@ body {
 .box {
     background: #fff;
     padding: 30px;
-    width: 300px;
+    width: 320px;
     border-radius: 10px;
     text-align: center;
 }
@@ -26,6 +26,7 @@ input {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
+    box-sizing: border-box;
 }
 
 button {
@@ -35,6 +36,7 @@ button {
     color: white;
     border: none;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .link {
@@ -51,7 +53,8 @@ button {
 <div class="box">
     <h2>LOGIN</h2>
 
-    <input type="email" id="email" placeholder="Email">
+    <!-- AGORA É USUÁRIO E NÃO EMAIL -->
+    <input type="text" id="usuario" placeholder="Usuário">
     <input type="password" id="senha" placeholder="Senha">
 
     <button onclick="login()">ENTRAR</button>
@@ -62,11 +65,21 @@ button {
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
   getAuth,
   signInWithEmailAndPassword,
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyC0YaL9Fb9Z7gmUvvCP9KekLyBpTmaAHhQ",
@@ -79,42 +92,104 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-window.login = function () {
-    const email = document.getElementById('email').value;
-    const senha = document.getElementById('senha').value;
 
-    signInWithEmailAndPassword(auth, email, senha)
-    .then(() => {
-        alert("Login OK");
+window.login = async function () {
+    const usuario = document.getElementById("usuario").value.trim().toUpperCase();
+    const senha = document.getElementById("senha").value;
 
-        if(email === "admin@vettor.com"){
-            window.location.href = "admin.html";
-        } else {
-            window.location.href = "index.html";
-        }
-    })
-    .catch(() => {
-        alert("Erro no login");
-    });
-}
-
-window.esqueciSenha = function () {
-    const email = document.getElementById('email').value;
-
-    if(!email){
-        alert("Digite seu email");
+    if (!usuario || !senha) {
+        alert("Preencha usuário e senha");
         return;
     }
 
-    sendPasswordResetEmail(auth, email)
-    .then(() => {
+    try {
+        // ADMIN DIRETO
+        if (usuario === "ADMIN") {
+            await signInWithEmailAndPassword(
+                auth,
+                "admin@vettor.com",
+                senha
+            );
+
+            window.location.href = "admin.html";
+            return;
+        }
+
+        // PROCURA USUÁRIO NO FIRESTORE
+        const q = query(
+            collection(db, "usuarios"),
+            where("usuario", "==", usuario)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            alert("Usuário não encontrado");
+            return;
+        }
+
+        const dadosUsuario = querySnapshot.docs[0].data();
+        const email = dadosUsuario.email;
+
+        // LOGIN COM EMAIL REAL + SENHA
+        await signInWithEmailAndPassword(auth, email, senha);
+
+        // SALVA DADOS PARA USAR NO FORMULÁRIO
+        localStorage.setItem("usuarioNome", dadosUsuario.nome || "");
+        localStorage.setItem("usuarioCodigo", dadosUsuario.codigo || "");
+        localStorage.setItem("sequenciaAtual", dadosUsuario.sequencia || "0001");
+
+        window.location.href = "index.html";
+
+    } catch (error) {
+        console.log(error);
+        alert("Erro no login");
+    }
+};
+
+
+window.esqueciSenha = async function () {
+    const usuario = document.getElementById("usuario").value.trim().toUpperCase();
+
+    if (!usuario) {
+        alert("Digite seu usuário primeiro");
+        return;
+    }
+
+    try {
+        // ADMIN
+        if (usuario === "ADMIN") {
+            await sendPasswordResetEmail(auth, "admin@vettor.com");
+            alert("Email de recuperação enviado");
+            return;
+        }
+
+        // PROCURA EMAIL PELO USUÁRIO
+        const q = query(
+            collection(db, "usuarios"),
+            where("usuario", "==", usuario)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            alert("Usuário não encontrado");
+            return;
+        }
+
+        const dadosUsuario = querySnapshot.docs[0].data();
+
+        await sendPasswordResetEmail(auth, dadosUsuario.email);
+
         alert("Email de recuperação enviado");
-    })
-    .catch(() => {
+
+    } catch (error) {
+        console.log(error);
         alert("Erro ao enviar email");
-    });
-}
+    }
+};
 
 </script>
 
