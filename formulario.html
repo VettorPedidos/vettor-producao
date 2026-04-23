@@ -950,7 +950,7 @@ async function atualizarSequenciaPedido() {
 
     const dados = snap.data();
 
-    let atual = parseInt(dados.sequencia || "1");
+    let atual = parseInt(dados.sequencia || "0000");
     let proximo = atual + 1;
 
     let novoNumero = String(proximo).padStart(4, "0");
@@ -985,12 +985,11 @@ window.salvarPDF = async function () {
 
     await atualizarSequenciaPedido();
 
-    salvarPDFAntigo();
+    await carregarDadosUsuario();
 
-    setTimeout(() => {
-        carregarDadosUsuario();
-        calcularDatas();
-    }, 1500);
+    calcularDatas();
+
+    salvarPDFAntigo();
 };
 	
 window.gerenciarCliquePunho = gerenciarCliquePunho;
