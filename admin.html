@@ -159,9 +159,9 @@ window.cadastrarUsuario = async function () {
         });
 
     } catch (error) {
-        console.log(error);
-        alert("Erro ao cadastrar usuário");
-    }
+    console.log("ERRO FIREBASE:", error);
+    alert("Erro: " + error.message);
+}
 };
 
 window.logout = function () {
