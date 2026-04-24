@@ -141,17 +141,26 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_BUCKET",
-  messagingSenderId: "SEU_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyC0YaL9Fb9Z7gmUvvCP9KekLyBpTmaAHhQ",
+  authDomain: "vettor-app.firebaseapp.com",
+  projectId: "vettor-app",
+  storageBucket: "vettor-app.firebasestorage.app",
+  messagingSenderId: "833679689475",
+  appId: "1:833679689475:web:b7ceb62ce14ab9b9b28b36"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+    /* NORMALIZAR TEXTO */
+function normalizarTexto(texto) {
+    return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
 
 /* CADASTRAR USUÁRIO */
 
@@ -181,16 +190,17 @@ window.cadastrarUsuario = async function () {
         const uid = userCredential.user.uid;
 
         await setDoc(doc(db, "usuarios", uid), {
-            nome,
-            usuario,
-            codigo,
-            email,
-            sequencia,
-            tipo,
-            status,
-            senhaProvisoria: true,
-            criadoEm: new Date()
-        });
+    nome,
+    nomeBusca: normalizarTexto(nome),
+    usuario,
+    codigo,
+    email,
+    sequencia,
+    tipo,
+    status,
+    senhaProvisoria: true,
+    criadoEm: new Date()
+});
 
         await signInWithEmailAndPassword(
             auth,
@@ -213,11 +223,9 @@ window.cadastrarUsuario = async function () {
 /* BUSCAR USUÁRIO */
 
 window.buscarUsuario = async function () {
-    const nomeBusca = document
-        .getElementById("buscarUsuario")
-        .value
-        .trim()
-        .toUpperCase();
+    const nomeBusca = normalizarTexto(
+    document.getElementById("buscarUsuario").value
+);
 
     if (!nomeBusca) {
         alert("Digite o nome do usuário");
@@ -230,8 +238,8 @@ window.buscarUsuario = async function () {
     try {
         const q = query(
             collection(db, "usuarios"),
-            where("nome", ">=", nomeBusca),
-            where("nome", "<=", nomeBusca + "\uf8ff")
+           where("nomeBusca", ">=", nomeBusca),
+           where("nomeBusca", "<=", nomeBusca + "\uf8ff")
         );
 
         const snapshot = await getDocs(q);
