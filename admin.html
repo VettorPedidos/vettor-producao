@@ -202,10 +202,10 @@ window.cadastrarUsuario = async function () {
 });
 
         await signInWithEmailAndPassword(
-            auth,
-            "admin@vettor.com",
-            prompt("Digite novamente a senha do ADMIN:")
-        );
+    auth,
+    "vtrsportsdados@gmail.com",
+    prompt("Digite novamente a senha do ADMIN:")
+);
 
         alert("Usuário cadastrado com sucesso");
 
@@ -213,12 +213,24 @@ window.cadastrarUsuario = async function () {
             input.value = "";
         });
 
-    } catch (error) {
-        console.log(error);
-        alert("Erro: " + error.message);
-    }
-};
+   } catch (error) {
+    console.log(error);
 
+    let msg = "Erro ao cadastrar usuário";
+
+    if (error.code === "auth/email-already-in-use") {
+        msg = "Este email já está em uso.";
+    } else if (error.code === "auth/invalid-email") {
+        msg = "Email inválido.";
+    } else if (error.code === "auth/weak-password") {
+        msg = "Senha precisa ter no mínimo 6 caracteres.";
+    } else if (error.code === "auth/invalid-credential") {
+        msg = "Senha do admin incorreta.";
+    }
+
+    alert(msg);
+}
+};
 /* BUSCAR USUÁRIO */
 
 window.buscarUsuario = async function () {
