@@ -241,43 +241,43 @@ window.buscarUsuario = async function () {
            where("nomeBusca", "<=", nomeBusca + "\uf8ff")
         );
 
-        const snapshot = await getDocs(q);
+     const snapshot = await getDocs(q);
 
-        if (snapshot.empty) {
-            resultado.innerHTML = "Usuário não encontrado";
-            return;
-        }
+if (snapshot.empty) {
+    resultado.innerHTML = "Usuário não encontrado";
+    return;
+}
 
-        let html = "";
+let html = "";
 
-        snapshot.forEach((docSnap) => {
-            const dados = docSnap.data();
+snapshot.forEach((docSnap) => {
+    const dados = docSnap.data();
 
-            html += `
-                <div class="card-usuario">
-                    <b>NOME:</b> ${dados.nome}<br>
-                    <b>USUÁRIO:</b> ${dados.usuario}<br>
-                    <b>CÓDIGO:</b> ${dados.codigo}<br>
-                    <b>EMAIL:</b> ${dados.email}<br>
-                    <b>STATUS:</b> ${dados.status}<br><br>
+    html += `
+        <div class="card-usuario">
+            <b>NOME:</b> ${dados.nome}<br>
+            <b>USUÁRIO:</b> ${dados.usuario}<br>
+            <b>CÓDIGO:</b> ${dados.codigo}<br>
+            <b>EMAIL:</b> ${dados.email}<br>
+            <b>STATUS:</b> ${dados.status}<br><br>
 
-                    <button onclick="bloquearUsuario('${docSnap.id}')">
-                        BLOQUEAR USUÁRIO
-                    </button>
-                </div>
-            `;
-        });
+            <button onclick="bloquearUsuario('${docSnap.id}')">
+                BLOQUEAR USUÁRIO
+            </button>
+        </div>
+    `;
+});
 
-        resultado.innerHTML = html;
+resultado.innerHTML = html;
 
-    } catch (error) {
-        console.log(error);
-        resultado.innerHTML = "Erro ao buscar usuário";
-    }
+} catch (error) {
+    console.log(error);
+    resultado.innerHTML = "Erro ao buscar usuário";
+}
 };
 
-/* BLOQUEAR USUÁRIO */
 
+/* BLOQUEAR USUÁRIO */
 window.bloquearUsuario = async function (uid) {
     const confirmar = confirm(
         "Deseja realmente bloquear este usuário?"
@@ -293,26 +293,14 @@ window.bloquearUsuario = async function (uid) {
         alert("Usuário bloqueado com sucesso");
         buscarUsuario();
 
-  } catch (error) {
-    console.log(error);
-
-    let msg = "Erro ao cadastrar usuário";
-
-    if (error.code === "auth/email-already-in-use") {
-        msg = "Este email já está em uso. Tente outro ou redefina a senha.";
-    } else if (error.code === "auth/invalid-email") {
-        msg = "O email digitado não é válido.";
-    } else if (error.code === "auth/weak-password") {
-        msg = "A senha precisa ter pelo menos 6 caracteres.";
-    } else if (error.code === "auth/invalid-credential") {
-        msg = "Credenciais inválidas, verifique seus dados.";
+    } catch (error) {
+        console.log(error);
+        alert("Erro ao bloquear usuário");
     }
+};
 
-    alert(msg);
-}
 
 /* LOGOUT */
-
 window.logout = function () {
     signOut(auth).then(() => {
         window.location.href = "index.html";
